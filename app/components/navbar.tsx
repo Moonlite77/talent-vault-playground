@@ -7,50 +7,80 @@ import { ConnectButton } from "thirdweb/react"
 import { Menu, X } from "lucide-react"
 import { client } from "./thirdwebComponents/client"
 import next from "@/public/next.svg"
+import { logout } from "@/app/actions/login"
 
-export default function NavBar() {
+interface NavBarProps {
+  isLoggedIn: boolean
+}
+
+export default function NavBar({ isLoggedIn }: NavBarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen)
   }
 
+  const handleLogout = async () => {
+    await logout()
+    // You might want to add some client-side logic here, like refreshing the page or updating state
+    window.location.href = "/" // Redirect to home page after logout
+  }
+
   return (
     <nav className="bg-white shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
-          <div className="flex items-center">
-            <Link href="/" className="flex-shrink-0">
-              <Image src={next} alt="TalentVault" width={32} height={32} />
-            </Link>
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <Link href="/" className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
-                  Home
-                </Link>
-                <Link
-                  href="/about"
-                  className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  About
-                </Link>
-                <Link
-                  href="/contact"
-                  className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"
-                >
-                  Contact
-                </Link>
-              </div>
+          <Link href="/" className="flex-shrink-0">
+            <Image src={next || "/placeholder.svg"} alt="TalentVault" width={32} height={32} />
+          </Link>
+          <div className="hidden md:flex flex-grow justify-center">
+            <div className="flex items-baseline space-x-4">
+              <Link href="/" className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                Home
+              </Link>
+              <Link href="/about" className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium">
+                About
+              </Link>
+              <Link
+                href="/contact"
+                className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"
+              >
+                Contact
+              </Link>
+              {isLoggedIn && (
+                <>
+                  <Link
+                    href="/onboard"
+                    className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Onboard
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Dashboard
+                  </Link>
+                  <button
+                    onClick={handleLogout}
+                    className="text-gray-700 hover:bg-gray-100 px-3 py-2 rounded-md text-sm font-medium"
+                  >
+                    Logout
+                  </button>
+                </>
+              )}
             </div>
           </div>
           <div className="hidden md:block">
-            <ConnectButton
-              client={client}
-              appMetadata={{
-                name: "TalentVaultPlayground",
-                url: "https://talentvault.com",
-              }}
-            />
+            {!isLoggedIn && (
+              <ConnectButton
+                client={client}
+                appMetadata={{
+                  name: "TalentVaultPlayground",
+                  url: "https://talentvault.com",
+                }}
+              />
+            )}
           </div>
           <div className="md:hidden">
             <button
@@ -86,16 +116,40 @@ export default function NavBar() {
             >
               Contact
             </Link>
+            {isLoggedIn && (
+              <>
+                <Link
+                  href="/onboard"
+                  className="text-gray-700 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Onboard
+                </Link>
+                <Link
+                  href="/dashboard"
+                  className="text-gray-700 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="text-gray-700 hover:bg-gray-100 block px-3 py-2 rounded-md text-base font-medium w-full text-left"
+                >
+                  Logout
+                </button>
+              </>
+            )}
           </div>
-          <div className="pt-4 pb-3 border-t border-gray-200">
-            <ConnectButton
-              client={client}
-              appMetadata={{
-                name: "TalentVaultPlayground",
-                url: "https://talentvault.com",
-              }}
-            />
-          </div>
+          {!isLoggedIn && (
+            <div className="pt-4 pb-3 border-t border-gray-200">
+              <ConnectButton
+                client={client}
+                appMetadata={{
+                  name: "TalentVaultPlayground",
+                  url: "https://talentvault.com",
+                }}
+              />
+            </div>
+          )}
         </div>
       )}
     </nav>

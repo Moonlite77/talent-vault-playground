@@ -1,22 +1,31 @@
-'use server'
+"use server"
 
-import { z } from "zod";
+import { z } from "zod"
 
-const firstNameSchema = z.string().min(2, {message:"must have at least 2 characters"}).max(10, {message: "Name must be less than 10 characters"});
+const firstNameSchema = z
+  .string()
+  .min(2, { message: "must have at least 2 characters" })
+  .max(10, { message: "Name must be less than 10 characters" })
 
-export async function submitFirstName(prevState: any, formData: FormData){
-    const firstName: any = formData.get("firstName")
+type FormState = {
+  success: boolean
+  data?: string
+  message: string
+}
 
-    if(firstName){
-      const userFirstNameObject = firstNameSchema.safeParse(firstName)
-      if (userFirstNameObject.success) {
-        //update database
-        return { success: true, data: userFirstNameObject.data, message: "" }
-      } else {
-        return { success: false, message: userFirstNameObject.error.errors[0].message, data: "" }
-      }
+export async function submitFirstName(prevState: FormState, formData: FormData): Promise<FormState> {
+  const firstName = formData.get("firstName")
+
+  if (firstName && typeof firstName === "string") {
+    const userFirstNameResult = firstNameSchema.safeParse(firstName)
+    if (userFirstNameResult.success) {
+      // update database
+      return { success: true, data: userFirstNameResult.data, message: "" }
     } else {
-      return { success: false, message: "Please enter a name." }
+      return { success: false, message: userFirstNameResult.error.errors[0].message, data: undefined }
     }
-
+  } else {
+    return { success: false, message: "Please enter a name." }
   }
+}
+
